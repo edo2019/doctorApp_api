@@ -43,34 +43,64 @@ class UsersController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function register(Request $request)
-    {
-        //handle incoming request
-        $request->validate(
-            [    
-                'name'=>'required|string',
-                'email'=>'required|email',
-                'password'=>'required',
-            ]
-            );
-        $user =  user::create(
-            [
-                'name'=>$request->name,
-                'email'=>$request->email,
-                'type'=>'user',
-                'password'=>Hash::make($request->password),
+    // public function register(Request $request)
+    // {
+    //     //handle incoming request
+    //     $request->validate(
+    //         [    
+    //             'name'=>'required|string',
+    //             'email'=>'required|email|unique.users,email',
+    //             'password'=>'required|min:8',
+    //         ]
+    //         );
+    //     $user =  user::create(
+    //         [
+    //             'name'=>$request->name,
+    //             'email'=>$request->email,
+    //             'type'=>'user',
+    //             'password'=>Hash::make($request->password),
                 
-        ]
-        );
-        $userInfo = UserDetails::create(
-            [
-                'user_id'=>$user->id,
-                'status'=>'active',
-            ]
-           );
-           return $user;
+    //     ]
+    //     );
+    //     $userInfo = UserDetails::create(
+    //         [
+    //             'user_id'=>$user->id,
+    //             'status'=>'active',
+    //         ]
+    //        );
+    //        return $user;
 
-    }
+    // }
+    public function register(Request $request)
+{
+    // Validate incoming request
+    $request->validate([
+        'name' => 'required|string',
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|min:8',
+    ]);
+
+    // Create the user
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'type' => 'user',
+        'password' => Hash::make($request->password),
+    ]);
+
+    // Create additional user details
+    $userInfo = UserDetails::create([
+        'user_id' => $user->id,
+        'status' => 'active',
+    ]);
+
+    // Return a proper JSON response
+    return response()->json([
+        'message' => 'User registered successfully',
+        'user' => $user,
+    ], 201);
+}
+
 
 
     public function store(Request $request)
